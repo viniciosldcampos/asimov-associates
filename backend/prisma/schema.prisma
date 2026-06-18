@@ -1,0 +1,237 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────
+// USUÁRIOS E AUTENTICAÇÃO
+// ─────────────────────────────────────────
+
+enum Role {
+  ADMINISTRADOR
+  ADVOGADO
+  ASSISTENTE
+  ESTAGIARIO
+  FINANCEIRO
+  VISUALIZADOR
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(ADVOGADO)
+  avatar    String?
+  phone     String?
+  position  String?
+  team      String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Campos específicos de advogado
+  oab               String?
+  oabState          String?
+  specialties       String[]
+  experienceYears   Int?
+
+  // Relacionamentos
+  processesAsLawyer Process[]      @relation("LawyerProcesses")
+  appointments      Appointment[]
+  deadlines         Deadline[]
+
+  @@map("users")
+}
+
+// ─────────────────────────────────────────
+// CLIENTES
+// ─────────────────────────────────────────
+
+enum ClientType {
+  PESSOA_FISICA
+  PESSOA_JURIDICA
+}
+
+model Client {
+  id        String     @id @default(uuid())
+  name      String
+  type      ClientType @default(PESSOA_FISICA)
+  company   String?
+  cpf       String?    @unique
+  cnpj      String?    @unique
+  rg        String?
+  birthDate DateTime?
+  email     String?
+  phone     String?
+  address   String?
+  city      String?
+  state     String?
+  zipCode   String?
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // Relacionamentos
+  processes Process[]
+
+  @@map("clients")
+}
+
+// ─────────────────────────────────────────
+// CATEGORIAS
+// ─────────────────────────────────────────
+
+enum CategoryType {
+  AREA_DO_DIREITO
+  TIPO_DE_PROCESSO
+  FASE
+  VARA
+}
+
+model Category {
+  id          String       @id @default(uuid())
+  name        String
+  type        CategoryType
+  description String?
+  color       String?
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relacionamentos
+  processes Process[]
+
+  @@map("categories")
+}
+
+// ─────────────────────────────────────────
+// PROCESSOS
+// ─────────────────────────────────────────
+
+enum ProcessStatus {
+  EM_ANDAMENTO
+  CONCLUIDO
+  VENCIDO
+  AGUARDANDO
+  PENDENTE
+  ARQUIVADO
+}
+
+enum Instance {
+  PRIMEIRA_INSTANCIA
+  SEGUNDA_INSTANCIA
+  TRABALHISTA
+  SUPERIOR_TRIBUNAL
+  OUTROS
+}
+
+model Process {
+  id          String        @id @default(uuid())
+  number      String        @unique
+  description String?
+  status      ProcessStatus @default(EM_ANDAMENTO)
+  instance    Instance
+  phase       String
+  vara        String?
+  startDate   DateTime
+  endDate     DateTime?
+  isFinished  Boolean       @default(false)
+  isExpired   Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Chaves estrangeiras
+  clientId    String
+  lawyerId    String
+  categoryId  String?
+
+  // Relacionamentos
+  client      Client      @relation(fields: [clientId], references: [id])
+  lawyer      User        @relation("LawyerProcesses", fields: [lawyerId], references: [id])
+  category    Category?   @relation(fields: [categoryId], references: [id])
+  deadlines   Deadline[]
+  appointments Appointment[]
+
+  @@map("processes")
+}
+
+// ─────────────────────────────────────────
+// PRAZOS
+// ─────────────────────────────────────────
+
+enum DeadlineType {
+  PROCESSUAL
+  AUDIENCIA
+  OUTROS
+}
+
+enum DeadlineStatus {
+  PENDENTE
+  VENCE_HOJE
+  VENCIDO
+  CONCLUIDO
+}
+
+model Deadline {
+  id          String         @id @default(uuid())
+  title       String
+  type        DeadlineType   @default(PROCESSUAL)
+  status      DeadlineStatus @default(PENDENTE)
+  date        DateTime
+  description String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  // Chaves estrangeiras
+  processId   String
+  lawyerId    String
+
+  // Relacionamentos
+  process     Process @relation(fields: [processId], references: [id])
+  lawyer      User    @relation(fields: [lawyerId], references: [id])
+
+  @@map("deadlines")
+}
+
+// ─────────────────────────────────────────
+// AGENDA / COMPROMISSOS
+// ─────────────────────────────────────────
+
+enum AppointmentType {
+  AUDIENCIA
+  REUNIAO
+  PRAZO
+  OUTROS
+}
+
+model Appointment {
+  id          String          @id @default(uuid())
+  title       String
+  type        AppointmentType @default(REUNIAO)
+  startTime   DateTime
+  endTime     DateTime
+  location    String?
+  description String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  // Chaves estrangeiras
+  processId   String?
+  lawyerId    String
+
+  // Relacionamentos
+  process     Process? @relation(fields: [processId], references: [id])
+  lawyer      User     @relation(fields: [lawyerId], references: [id])
+
+  @@map("appointments")
+}

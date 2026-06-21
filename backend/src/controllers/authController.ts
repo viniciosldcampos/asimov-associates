@@ -32,3 +32,7 @@ export async function login(req: Request, res: Response) {
     return res.status(401).json({ error: error.message });
   }
 }
+
+export async function me(req: Request, res: Response) {
+  return res.status(200).json({ user: req.user });
+}

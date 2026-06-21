@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import authRoutes from "./routes/authRoutes";
 
 dotenv.config();
 
@@ -10,6 +11,9 @@ const PORT = process.env.PORT || 3333;
 // Middlewares globais
 app.use(cors());
 app.use(express.json());
+
+// Rotas
+app.use("/api/auth", authRoutes);
 
 // Rota de teste
 app.get("/health", (req, res) => {
@@ -22,8 +26,8 @@ app.get("/health", (req, res) => {
 
 // Inicia o servidor
 app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-  console.log(`Health check: http://localhost:${PORT}/health`);
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
+  console.log(`📡 Health check: http://localhost:${PORT}/health`);
 });
 
 export default app;

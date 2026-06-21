@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes";
 import clientRoutes from "./routes/clientRoutes";
+import lawyerRoutes from "./routes/lawyerRoutes";
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/clients", clientRoutes);
+app.use('/api/lawyers', lawyerRoutes);
 
 app.get("/health", (req, res) => {
   res.json({

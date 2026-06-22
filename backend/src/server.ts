@@ -5,6 +5,7 @@ import authRoutes from "./routes/authRoutes";
 import clientRoutes from "./routes/clientRoutes";
 import lawyerRoutes from "./routes/lawyerRoutes";
 import processRoutes from "./routes/processRoutes";
+import deadlineRoutes from "./routes/deadlineRoutes";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/clients", clientRoutes);
 app.use("/api/lawyers", lawyerRoutes);
 app.use("/api/processes", processRoutes);
+app.use("/api/deadlines", deadlineRoutes);
 
 app.get("/health", (req, res) => {
   res.json({

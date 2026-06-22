@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes";
 import clientRoutes from "./routes/clientRoutes";
 import lawyerRoutes from "./routes/lawyerRoutes";
+import processRoutes from "./routes/processRoutes";
 
 dotenv.config();
 
@@ -15,7 +16,8 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/clients", clientRoutes);
-app.use('/api/lawyers', lawyerRoutes);
+app.use("/api/lawyers", lawyerRoutes);
+app.use("/api/processes", processRoutes);
 
 app.get("/health", (req, res) => {
   res.json({

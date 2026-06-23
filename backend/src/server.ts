@@ -8,6 +8,7 @@ import processRoutes from "./routes/processRoutes";
 import deadlineRoutes from "./routes/deadlineRoutes";
 import appointmentRoutes from "./routes/appointmentRoutes";
 import categoryRoutes from "./routes/categoryRoutes";
+import dashboardRoutes from "./routes/dashboardRoutes";
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use("/api/processes", processRoutes);
 app.use("/api/deadlines", deadlineRoutes);
 app.use("/api/appointments", appointmentRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 app.get("/health", (req, res) => {
   res.json({

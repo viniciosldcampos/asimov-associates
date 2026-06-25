@@ -5,6 +5,7 @@ import { AuthProvider } from './contexts/AuthProvider'
 import { useAuth } from './contexts/useAuth'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
+import ProcessesPage from './pages/ProcessesPage'
 
 const queryClient = new QueryClient()
 
@@ -37,6 +38,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/processos"
+        element={
+          <ProtectedRoute>
+            <ProcessesPage />
           </ProtectedRoute>
         }
       />

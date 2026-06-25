@@ -11,7 +11,12 @@ export interface ProcessListItem {
   lawyer: { id: string; name: string };
 }
 
-export async function getRecentProcesses() {
+export async function getAllProcesses() {
   const response = await apiClient.get<ProcessListItem[]>("/processes");
-  return response.data.slice(0, 5);
+  return response.data;
+}
+
+export async function getRecentProcesses() {
+  const all = await getAllProcesses();
+  return all.slice(0, 5);
 }

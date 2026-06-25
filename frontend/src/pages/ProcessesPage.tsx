@@ -5,6 +5,7 @@ import { ptBR } from 'date-fns/locale'
 import { Plus, Scale, Search } from 'lucide-react'
 import MainLayout from '../components/MainLayout'
 import ProcessFormModal from '../components/ProcessFormModal'
+import ProcessActionsMenu from '../components/ProcessActionsMenu'
 import { getAllProcesses } from '../services/processService'
 import { STATUS_LABELS, STATUS_STYLES, INSTANCE_LABELS } from '../lib/processLabels'
 
@@ -139,6 +140,7 @@ export default function ProcessesPage() {
                   <th className="pb-3 font-medium">Fase</th>
                   <th className="pb-3 font-medium">Status</th>
                   <th className="pb-3 font-medium">Atualizado em</th>
+                  <th className="pb-3 font-medium"></th>
                 </tr>
               </thead>
               <tbody>
@@ -159,6 +161,9 @@ export default function ProcessesPage() {
                     </td>
                     <td className="py-3 text-slate-500">
                       {format(new Date(process.updatedAt), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                    </td>
+                    <td className="py-3 text-right">
+                      <ProcessActionsMenu processId={process.id} processNumber={process.number} />
                     </td>
                   </tr>
                 ))}

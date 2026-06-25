@@ -20,3 +20,12 @@ export async function getRecentProcesses() {
   const all = await getAllProcesses();
   return all.slice(0, 5);
 }
+
+export async function updateProcessStatus(id: string, status: string) {
+  const response = await apiClient.put(`/processes/${id}`, { status });
+  return response.data;
+}
+
+export async function deleteProcess(id: string) {
+  await apiClient.delete(`/processes/${id}`);
+}

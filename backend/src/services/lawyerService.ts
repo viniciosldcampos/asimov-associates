@@ -6,6 +6,7 @@ interface LawyerUpdateInput {
   specialties?: string[];
   experienceYears?: number;
   phone?: string;
+  isActive?: boolean;
 }
 
 export async function getAllLawyers() {
@@ -23,7 +24,6 @@ export async function getAllLawyers() {
       experienceYears: true,
       isActive: true,
       createdAt: true,
-      // Nunca selecionamos a senha
     },
     orderBy: { name: "asc" },
   });
@@ -45,6 +45,13 @@ export async function getLawyerById(id: string) {
       isActive: true,
       createdAt: true,
       processesAsLawyer: true,
+      activities: {
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        include: {
+          process: { select: { id: true, number: true } },
+        },
+      },
     },
   });
 

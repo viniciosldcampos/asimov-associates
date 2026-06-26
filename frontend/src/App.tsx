@@ -6,6 +6,7 @@ import { useAuth } from './contexts/useAuth'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import ProcessesPage from './pages/ProcessesPage'
+import LawyersPage from './pages/LawyersPage'
 
 const queryClient = new QueryClient()
 
@@ -46,6 +47,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <ProcessesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/advogados"
+        element={
+          <ProtectedRoute>
+            <LawyersPage />
           </ProtectedRoute>
         }
       />

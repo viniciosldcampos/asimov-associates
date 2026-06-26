@@ -40,15 +40,16 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Campos específicos de advogado
-  oab               String?
-  oabState          String?
-  specialties       String[]
-  experienceYears   Int?
+  oab             String?
+  oabState        String?
+  specialties     String[]
+  experienceYears Int?
 
   // Relacionamentos
-  processesAsLawyer Process[]      @relation("LawyerProcesses")
+  processesAsLawyer Process[]     @relation("LawyerProcesses")
   appointments      Appointment[]
   deadlines         Deadline[]
+  activities        Activity[]
 
   @@map("users")
 }
@@ -151,16 +152,17 @@ model Process {
   updatedAt   DateTime      @updatedAt
 
   // Chaves estrangeiras
-  clientId    String
-  lawyerId    String
-  categoryId  String?
+  clientId   String
+  lawyerId   String
+  categoryId String?
 
   // Relacionamentos
-  client      Client      @relation(fields: [clientId], references: [id])
-  lawyer      User        @relation("LawyerProcesses", fields: [lawyerId], references: [id])
-  category    Category?   @relation(fields: [categoryId], references: [id])
-  deadlines   Deadline[]
+  client       Client        @relation(fields: [clientId], references: [id])
+  lawyer       User          @relation("LawyerProcesses", fields: [lawyerId], references: [id])
+  category     Category?     @relation(fields: [categoryId], references: [id])
+  deadlines    Deadline[]
   appointments Appointment[]
+  activities   Activity[]
 
   @@map("processes")
 }
@@ -193,12 +195,12 @@ model Deadline {
   updatedAt   DateTime       @updatedAt
 
   // Chaves estrangeiras
-  processId   String
-  lawyerId    String
+  processId String
+  lawyerId  String
 
   // Relacionamentos
-  process     Process @relation(fields: [processId], references: [id])
-  lawyer      User    @relation(fields: [lawyerId], references: [id])
+  process Process @relation(fields: [processId], references: [id])
+  lawyer  User    @relation(fields: [lawyerId], references: [id])
 
   @@map("deadlines")
 }
@@ -226,12 +228,37 @@ model Appointment {
   updatedAt   DateTime        @updatedAt
 
   // Chaves estrangeiras
-  processId   String?
-  lawyerId    String
+  processId String?
+  lawyerId  String
 
   // Relacionamentos
-  process     Process? @relation(fields: [processId], references: [id])
-  lawyer      User     @relation(fields: [lawyerId], references: [id])
+  process Process? @relation(fields: [processId], references: [id])
+  lawyer  User     @relation(fields: [lawyerId], references: [id])
 
   @@map("appointments")
+}
+
+// ─────────────────────────────────────────
+// ATIVIDADES (LOG)
+// ─────────────────────────────────────────
+
+enum ActivityType {
+  PROCESSO_CRIADO
+  PROCESSO_ATUALIZADO
+  STATUS_ALTERADO
+}
+
+model Activity {
+  id          String       @id @default(uuid())
+  type        ActivityType
+  description String
+  createdAt   DateTime     @default(now())
+
+  processId String?
+  userId    String
+
+  process Process? @relation(fields: [processId], references: [id])
+  user    User     @relation(fields: [userId], references: [id])
+
+  @@map("activities")
 }

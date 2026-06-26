@@ -27,8 +27,16 @@ interface ProcessInput {
   categoryId?: string;
 }
 
+const STATUS_LABELS: Record<string, string> = {
+  EM_ANDAMENTO: "Em andamento",
+  CONCLUIDO: "Concluído",
+  VENCIDO: "Vencido",
+  AGUARDANDO: "Aguardando",
+  PENDENTE: "Pendente",
+  ARQUIVADO: "Arquivado",
+};
+
 export async function createProcess(data: ProcessInput) {
-  // Confirma que o cliente existe
   const client = await prisma.client.findUnique({
     where: { id: data.clientId },
   });
@@ -36,7 +44,6 @@ export async function createProcess(data: ProcessInput) {
     throw new Error("Cliente não encontrado");
   }
 
-  // Confirma que o advogado existe e tem o role correto
   const lawyer = await prisma.user.findFirst({
     where: { id: data.lawyerId, role: "ADVOGADO" },
   });
@@ -44,13 +51,24 @@ export async function createProcess(data: ProcessInput) {
     throw new Error("Advogado não encontrado");
   }
 
-  return prisma.process.create({
+  const process = await prisma.process.create({
     data: {
       ...data,
       startDate: new Date(data.startDate),
       endDate: data.endDate ? new Date(data.endDate) : undefined,
     },
   });
+
+  await prisma.activity.create({
+    data: {
+      type: "PROCESSO_CRIADO",
+      description: `Processo nº ${process.number} foi cadastrado`,
+      processId: process.id,
+      userId: data.lawyerId,
+    },
+  });
+
+  return process;
 }
 
 export async function getAllProcesses() {
@@ -89,7 +107,7 @@ export async function updateProcess(id: string, data: Partial<ProcessInput>) {
     throw new Error("Processo não encontrado");
   }
 
-  return prisma.process.update({
+  const updated = await prisma.process.update({
     where: { id },
     data: {
       ...data,
@@ -97,6 +115,28 @@ export async function updateProcess(id: string, data: Partial<ProcessInput>) {
       endDate: data.endDate ? new Date(data.endDate) : undefined,
     },
   });
+
+  if (data.status && data.status !== process.status) {
+    await prisma.activity.create({
+      data: {
+        type: "STATUS_ALTERADO",
+        description: `Status do processo nº ${process.number} alterado para "${STATUS_LABELS[data.status] ?? data.status}"`,
+        processId: process.id,
+        userId: process.lawyerId,
+      },
+    });
+  } else {
+    await prisma.activity.create({
+      data: {
+        type: "PROCESSO_ATUALIZADO",
+        description: `Processo nº ${process.number} foi atualizado`,
+        processId: process.id,
+        userId: process.lawyerId,
+      },
+    });
+  }
+
+  return updated;
 }
 
 export async function deleteProcess(id: string) {

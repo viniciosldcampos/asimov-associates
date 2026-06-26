@@ -8,6 +8,7 @@ import DashboardPage from './pages/DashboardPage'
 import ProcessesPage from './pages/ProcessesPage'
 import LawyersPage from './pages/LawyersPage'
 import ClientsPage from './pages/ClientsPage'
+import AgendaPage from './pages/AgendaPage'
 
 const queryClient = new QueryClient()
 
@@ -64,6 +65,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <ClientsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/agenda"
+        element={
+          <ProtectedRoute>
+            <AgendaPage />
           </ProtectedRoute>
         }
       />

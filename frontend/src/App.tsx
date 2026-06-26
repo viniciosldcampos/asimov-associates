@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import ProcessesPage from './pages/ProcessesPage'
 import LawyersPage from './pages/LawyersPage'
+import ClientsPage from './pages/ClientsPage'
 
 const queryClient = new QueryClient()
 
@@ -55,6 +56,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <LawyersPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/clientes"
+        element={
+          <ProtectedRoute>
+            <ClientsPage />
           </ProtectedRoute>
         }
       />

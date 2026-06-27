@@ -9,6 +9,7 @@ import ProcessesPage from './pages/ProcessesPage'
 import LawyersPage from './pages/LawyersPage'
 import ClientsPage from './pages/ClientsPage'
 import AgendaPage from './pages/AgendaPage'
+import DeadlinesPage from './pages/DeadlinesPage'
 
 const queryClient = new QueryClient()
 
@@ -73,6 +74,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <AgendaPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/prazos"
+        element={
+          <ProtectedRoute>
+            <DeadlinesPage />
           </ProtectedRoute>
         }
       />

@@ -6,9 +6,11 @@ export interface ProcessListItem {
   status: string;
   instance: string;
   phase: string;
+  startDate: string;
   updatedAt: string;
   client: { id: string; name: string };
   lawyer: { id: string; name: string };
+  category: { id: string; name: string } | null;
 }
 
 export async function getAllProcesses() {

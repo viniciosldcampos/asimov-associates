@@ -27,7 +27,7 @@ export default function Sidebar() {
   const { user } = useAuth()
 
   return (
-    <aside className="w-64 bg-slate-950 border-r border-slate-800 flex flex-col h-screen">
+    <aside className="w-[200px] bg-slate-950 border-r border-slate-800 flex flex-col h-screen">
       <div className="p-6 flex items-center gap-2">
         <Scale className="w-7 h-7 text-purple-500" />
         <div>

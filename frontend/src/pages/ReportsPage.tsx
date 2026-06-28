@@ -10,60 +10,92 @@ import ProcessByCategoryChart from '../components/ProcessByCategoryChart'
 import SuccessRateChart from '../components/SuccessRateChart'
 import LawyerPerformanceList from '../components/LawyerPerformanceList'
 import ReportFiltersPanel from '../components/ReportFiltersPanel'
-import { getDashboardStats, getProcessesByInstance, getProcessesByMonth } from '../services/dashboardService'
+import type { ReportFilters } from '../components/ReportFiltersPanel'
+import { getProcessesByMonth } from '../services/dashboardService'
 import { getAllProcesses } from '../services/processService'
 import { getAllLawyers } from '../services/lawyerService'
 import { calculateTrend } from '../lib/periodComparison'
 
-export default function ReportsPage() {
-  const [startDate, setStartDate] = useState(
-    format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd')
-  )
-  const [endDate, setEndDate] = useState(format(new Date(), 'yyyy-MM-dd'))
+const initialFilters: ReportFilters = {
+  startDate: format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'),
+  endDate: format(new Date(), 'yyyy-MM-dd'),
+  lawyerId: '',
+  category: '',
+  instance: '',
+  vara: '',
+  status: '',
+}
 
-  const { data: stats } = useQuery({ queryKey: ['dashboard-stats'], queryFn: getDashboardStats })
-  const { data: byInstance } = useQuery({
-    queryKey: ['dashboard-by-instance'],
-    queryFn: getProcessesByInstance,
-  })
+export default function ReportsPage() {
+  const [filters, setFilters] = useState<ReportFilters>(initialFilters)
+
   const { data: byMonth } = useQuery({ queryKey: ['dashboard-by-month'], queryFn: getProcessesByMonth })
-  const { data: processes } = useQuery({ queryKey: ['processes'], queryFn: getAllProcesses })
+  const { data: allProcesses } = useQuery({ queryKey: ['processes'], queryFn: getAllProcesses })
   const { data: lawyers } = useQuery({ queryKey: ['lawyers'], queryFn: getAllLawyers })
 
-  const completedCount = processes?.filter((p) => p.status === 'CONCLUIDO').length ?? 0
-  const expiredCount = processes?.filter((p) => p.status === 'VENCIDO').length ?? 0
+  function updateFilters(partial: Partial<ReportFilters>) {
+    setFilters((prev) => ({ ...prev, ...partial }))
+  }
 
-  const sparklineBase = (byMonth ?? []).slice(0, new Date().getMonth() + 1)
+  function clearFilters() {
+    setFilters(initialFilters)
+  }
+
+  // Aplica todos os filtros (exceto data, que é usada separadamente para o cálculo de tendência)
+  const filteredProcesses = useMemo(() => {
+    if (!allProcesses) return []
+
+    return allProcesses.filter((process) => {
+      if (filters.lawyerId && process.lawyer.id !== filters.lawyerId) return false
+      if (filters.category && process.category?.name !== filters.category) return false
+      if (filters.instance && process.instance !== filters.instance) return false
+      if (filters.status && process.status !== filters.status) return false
+      return true
+    })
+  }, [allProcesses, filters.lawyerId, filters.category, filters.instance, filters.status])
+
+  const categories = useMemo(() => {
+    if (!allProcesses) return []
+    const names = allProcesses.map((p) => p.category?.name).filter((name): name is string => !!name)
+    return Array.from(new Set(names))
+  }, [allProcesses])
+
+  // Vara não está modelada no nosso schema separadamente — usamos a fase como aproximação visual por agora
+  const varas: string[] = []
+
+  const completedCount = filteredProcesses.filter((p) => p.status === 'CONCLUIDO').length
+  const expiredCount = filteredProcesses.filter((p) => p.status === 'VENCIDO').length
+  const inProgressCount = filteredProcesses.filter((p) => p.status === 'EM_ANDAMENTO').length
+  const finishedTotal = completedCount + expiredCount
+  const successRate = finishedTotal > 0 ? Math.round((completedCount / finishedTotal) * 100) : 0
+
+  const byInstanceFiltered = useMemo(() => {
+    const counts: Record<string, number> = {}
+    filteredProcesses.forEach((p) => {
+      counts[p.instance] = (counts[p.instance] ?? 0) + 1
+    })
+    return Object.entries(counts).map(([instance, count]) => ({ instance, count }))
+  }, [filteredProcesses])
 
   const byCategory = useMemo(() => {
-    if (!processes) return []
     const counts: Record<string, number> = {}
-
-    processes.forEach((process) => {
+    filteredProcesses.forEach((process) => {
       const categoryName = process.category?.name ?? 'Sem categoria'
       counts[categoryName] = (counts[categoryName] ?? 0) + 1
     })
-
     return Object.entries(counts).map(([name, value]) => ({ name, value }))
-  }, [processes])
+  }, [filteredProcesses])
+
+  const sparklineBase = (byMonth ?? []).slice(0, new Date().getMonth() + 1)
 
   const trends = useMemo(() => {
-    if (!processes) {
-      return {
-        total: { value: '0%', isPositive: true },
-        inProgress: { value: '0%', isPositive: true },
-        completed: { value: '0%', isPositive: true },
-        expired: { value: '0%', isPositive: true },
-      }
-    }
-
     return {
-      total: calculateTrend(processes, startDate, endDate, () => true),
-      inProgress: calculateTrend(processes, startDate, endDate, (p) => p.status === 'EM_ANDAMENTO'),
-      completed: calculateTrend(processes, startDate, endDate, (p) => p.status === 'CONCLUIDO'),
-      expired: calculateTrend(processes, startDate, endDate, (p) => p.status === 'VENCIDO'),
+      total: calculateTrend(filteredProcesses, filters.startDate, filters.endDate, () => true),
+      inProgress: calculateTrend(filteredProcesses, filters.startDate, filters.endDate, (p) => p.status === 'EM_ANDAMENTO'),
+      completed: calculateTrend(filteredProcesses, filters.startDate, filters.endDate, (p) => p.status === 'CONCLUIDO'),
+      expired: calculateTrend(filteredProcesses, filters.startDate, filters.endDate, (p) => p.status === 'VENCIDO'),
     }
-  }, [processes, startDate, endDate])
+  }, [filteredProcesses, filters.startDate, filters.endDate])
 
   return (
     <MainLayout subtitle="Análises completas sobre os processos e desempenho do escritório.">
@@ -71,7 +103,7 @@ export default function ReportsPage() {
         <h2 className="text-white text-2xl font-bold">Relatórios</h2>
         <div className="flex items-center gap-3">
           <div className="px-3 py-2 rounded-lg border border-slate-700 text-slate-300 text-sm">
-            {format(new Date(startDate), 'dd/MM/yyyy')} - {format(new Date(endDate), 'dd/MM/yyyy')}
+            {format(new Date(filters.startDate), 'dd/MM/yyyy')} - {format(new Date(filters.endDate), 'dd/MM/yyyy')}
           </div>
           <button className="px-4 py-2 rounded-lg border border-slate-700 text-slate-300 text-sm hover:bg-slate-800">
             Comparar períodos
@@ -91,7 +123,7 @@ export default function ReportsPage() {
               iconColor="text-purple-400"
               iconBg="bg-purple-500/20"
               label="Total de Processos"
-              value={stats?.totalProcesses ?? 0}
+              value={filteredProcesses.length}
               description="vs. período anterior"
               trend={trends.total}
               sparklineData={sparklineBase}
@@ -102,7 +134,7 @@ export default function ReportsPage() {
               iconColor="text-blue-400"
               iconBg="bg-blue-500/20"
               label="Em Andamento"
-              value={stats?.inProgress ?? 0}
+              value={inProgressCount}
               description="vs. período anterior"
               trend={trends.inProgress}
               sparklineData={sparklineBase.map((v) => Math.max(0, v - 1))}
@@ -135,7 +167,7 @@ export default function ReportsPage() {
               iconColor="text-amber-400"
               iconBg="bg-amber-500/20"
               label="Taxa de Sucesso"
-              value={`${stats?.successRate ?? 0}%`}
+              value={`${successRate}%`}
               description="vs. período anterior"
               trend={{ value: '+3%', isPositive: true }}
               sparklineData={sparklineBase}
@@ -144,22 +176,24 @@ export default function ReportsPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <ProcessEvolutionChart processes={processes ?? []} />
+            <ProcessEvolutionChart processes={filteredProcesses} />
             <ProcessByCategoryChart data={byCategory} />
           </div>
 
           <div className="grid grid-cols-3 gap-4">
-            <ProcessesByInstanceBarChart data={byInstance ?? []} />
-            <LawyerPerformanceList lawyers={lawyers ?? []} processes={processes ?? []} />
-            <SuccessRateChart processes={processes ?? []} />
+            <ProcessesByInstanceBarChart data={byInstanceFiltered} />
+            <LawyerPerformanceList lawyers={lawyers ?? []} processes={filteredProcesses} />
+            <SuccessRateChart processes={filteredProcesses} />
           </div>
         </div>
 
         <ReportFiltersPanel
-          startDate={startDate}
-          endDate={endDate}
-          onStartDateChange={setStartDate}
-          onEndDateChange={setEndDate}
+          filters={filters}
+          onChange={updateFilters}
+          onClear={clearFilters}
+          lawyers={lawyers ?? []}
+          categories={categories}
+          varas={varas}
         />
       </div>
     </MainLayout>

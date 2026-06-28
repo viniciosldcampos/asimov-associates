@@ -1,24 +1,42 @@
 import { Download, FileText, Clock, Sparkles } from 'lucide-react'
+import { INSTANCE_LABELS, STATUS_LABELS } from '../lib/processLabels'
+import type { LawyerListItem } from '../services/lawyerService'
 
-interface ReportFiltersPanelProps {
+export interface ReportFilters {
   startDate: string
   endDate: string
-  onStartDateChange: (value: string) => void
-  onEndDateChange: (value: string) => void
+  lawyerId: string
+  category: string
+  instance: string
+  vara: string
+  status: string
+}
+
+interface ReportFiltersPanelProps {
+  filters: ReportFilters
+  onChange: (partial: Partial<ReportFilters>) => void
+  onClear: () => void
+  lawyers: LawyerListItem[]
+  categories: string[]
+  varas: string[]
 }
 
 export default function ReportFiltersPanel({
-  startDate,
-  endDate,
-  onStartDateChange,
-  onEndDateChange,
+  filters,
+  onChange,
+  onClear,
+  lawyers,
+  categories,
+  varas,
 }: ReportFiltersPanelProps) {
   return (
     <aside className="w-72 space-y-4">
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-white font-semibold">Filtros</h3>
-          <button className="text-purple-400 text-xs hover:underline">Limpar filtros</button>
+          <button onClick={onClear} className="text-purple-400 text-xs hover:underline">
+            Limpar filtros
+          </button>
         </div>
 
         <div className="space-y-4">
@@ -30,56 +48,97 @@ export default function ReportFiltersPanel({
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <div>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => onStartDateChange(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-300"
-              />
-            </div>
-            <div>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => onEndDateChange(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-300"
-              />
-            </div>
+            <input
+              type="date"
+              value={filters.startDate}
+              onChange={(e) => onChange({ startDate: e.target.value })}
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-300"
+            />
+            <input
+              type="date"
+              value={filters.endDate}
+              onChange={(e) => onChange({ endDate: e.target.value })}
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-300"
+            />
           </div>
 
           <div>
             <label className="block text-xs text-slate-500 mb-1">Advogado</label>
-            <select className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300">
-              <option>Todos os advogados</option>
+            <select
+              value={filters.lawyerId}
+              onChange={(e) => onChange({ lawyerId: e.target.value })}
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300"
+            >
+              <option value="">Todos os advogados</option>
+              {lawyers.map((lawyer) => (
+                <option key={lawyer.id} value={lawyer.id}>
+                  {lawyer.name}
+                </option>
+              ))}
             </select>
           </div>
 
           <div>
             <label className="block text-xs text-slate-500 mb-1">Área do Direito</label>
-            <select className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300">
-              <option>Todas as áreas</option>
+            <select
+              value={filters.category}
+              onChange={(e) => onChange({ category: e.target.value })}
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300"
+            >
+              <option value="">Todas as áreas</option>
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
             </select>
           </div>
 
           <div>
             <label className="block text-xs text-slate-500 mb-1">Instância</label>
-            <select className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300">
-              <option>Todas as instâncias</option>
+            <select
+              value={filters.instance}
+              onChange={(e) => onChange({ instance: e.target.value })}
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300"
+            >
+              <option value="">Todas as instâncias</option>
+              {Object.entries(INSTANCE_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
             </select>
           </div>
 
           <div>
             <label className="block text-xs text-slate-500 mb-1">Vara</label>
-            <select className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300">
-              <option>Todas as varas</option>
+            <select
+              value={filters.vara}
+              onChange={(e) => onChange({ vara: e.target.value })}
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300"
+            >
+              <option value="">Todas as varas</option>
+              {varas.map((vara) => (
+                <option key={vara} value={vara}>
+                  {vara}
+                </option>
+              ))}
             </select>
           </div>
 
           <div>
             <label className="block text-xs text-slate-500 mb-1">Status do Processo</label>
-            <select className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300">
-              <option>Todos os status</option>
+            <select
+              value={filters.status}
+              onChange={(e) => onChange({ status: e.target.value })}
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300"
+            >
+              <option value="">Todos os status</option>
+              {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
             </select>
           </div>
         </div>

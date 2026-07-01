@@ -9,6 +9,8 @@ import deadlineRoutes from "./routes/deadlineRoutes";
 import appointmentRoutes from "./routes/appointmentRoutes";
 import categoryRoutes from "./routes/categoryRoutes";
 import dashboardRoutes from "./routes/dashboardRoutes";
+import userRoutes from "./routes/userRoutes";
+import permissionRoutes from "./routes/permissionRoutes";
 
 dotenv.config();
 
@@ -26,6 +28,8 @@ app.use("/api/deadlines", deadlineRoutes);
 app.use("/api/appointments", appointmentRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/permissions", permissionRoutes);
 
 app.get("/health", (req, res) => {
   res.json({

@@ -11,6 +11,7 @@ import ClientsPage from './pages/ClientsPage'
 import AgendaPage from './pages/AgendaPage'
 import DeadlinesPage from './pages/DeadlinesPage'
 import ReportsPage from './pages/ReportsPage'
+import SettingsPage from './pages/SettingsPage'
 
 const queryClient = new QueryClient()
 
@@ -38,62 +39,14 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/processos"
-        element={
-          <ProtectedRoute>
-            <ProcessesPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/advogados"
-        element={
-          <ProtectedRoute>
-            <LawyersPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/clientes"
-        element={
-          <ProtectedRoute>
-            <ClientsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/agenda"
-        element={
-          <ProtectedRoute>
-            <AgendaPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/prazos"
-        element={
-          <ProtectedRoute>
-            <DeadlinesPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/relatorios"
-        element={
-          <ProtectedRoute>
-            <ReportsPage />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+      <Route path="/processos" element={<ProtectedRoute><ProcessesPage /></ProtectedRoute>} />
+      <Route path="/advogados" element={<ProtectedRoute><LawyersPage /></ProtectedRoute>} />
+      <Route path="/clientes" element={<ProtectedRoute><ClientsPage /></ProtectedRoute>} />
+      <Route path="/agenda" element={<ProtectedRoute><AgendaPage /></ProtectedRoute>} />
+      <Route path="/prazos" element={<ProtectedRoute><DeadlinesPage /></ProtectedRoute>} />
+      <Route path="/relatorios" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
+      <Route path="/configuracoes" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   )

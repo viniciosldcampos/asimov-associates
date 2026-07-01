@@ -50,6 +50,7 @@ model User {
   appointments      Appointment[]
   deadlines         Deadline[]
   activities        Activity[]
+  permissions       Permission[]
 
   @@map("users")
 }
@@ -261,4 +262,44 @@ model Activity {
   user    User     @relation(fields: [userId], references: [id])
 
   @@map("activities")
+}
+
+// ─────────────────────────────────────────
+// PERMISSÕES
+// ─────────────────────────────────────────
+
+enum PermissionLevel {
+  FULL
+  EDIT
+  READ
+  NONE
+}
+
+enum AppModule {
+  DASHBOARD
+  PROCESSOS
+  ADVOGADOS
+  CLIENTES
+  AGENDA
+  PRAZOS
+  RELATORIOS
+  CONFIGURACOES
+  USUARIOS
+  PERMISSOES
+  CATEGORIAS
+  FINANCEIRO
+}
+
+model Permission {
+  id        String          @id @default(uuid())
+  level     PermissionLevel @default(READ)
+  module    AppModule
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, module])
+  @@map("permissions")
 }

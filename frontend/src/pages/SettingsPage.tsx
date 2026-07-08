@@ -5,6 +5,7 @@ import SettingsGeneralTab from '../components/settings/SettingsGeneralTab'
 import SettingsUsersTab from '../components/settings/SettingsUsersTab'
 import SettingsPermissionsTab from '../components/settings/SettingsPermissionsTab'
 import SettingsCategoriesTab from '../components/settings/SettingsCategoriesTab'
+import SettingsNotificationsTab from '../components/settings/SettingsNotificationTab'
 import type { SettingsTab } from '../components/SettingsNav'
 
 export default function SettingsPage() {
@@ -19,7 +20,8 @@ export default function SettingsPage() {
       {activeTab === 'usuarios' && <SettingsUsersTab />}
       {activeTab === 'permissoes' && <SettingsPermissionsTab />}
       {activeTab === 'categorias' && <SettingsCategoriesTab />}
-      {!['geral', 'usuarios', 'permissoes', 'categorias'].includes(activeTab) && (
+      {activeTab === 'notificacoes' && <SettingsNotificationsTab />}
+      {!['geral', 'usuarios', 'permissoes', 'categorias', 'notificacoes'].includes(activeTab) && (
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 text-center">
           <p className="text-slate-500">Esta seção está em desenvolvimento.</p>
         </div>
